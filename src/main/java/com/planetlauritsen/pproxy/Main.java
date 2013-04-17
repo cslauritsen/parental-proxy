@@ -115,18 +115,30 @@ public class Main implements Runnable {
 			} catch (TimeoutException e) {
 				logger.finest("write was timed out");
 			}
-		}		
+		}	
+		else {
+			logger.finest("Msg: " + msg);
+		}
 	}
 
+	public static final byte[] blankLine = {13,10,13,10};
+	private boolean endsBlankLine(ByteBuffer buf) {
+		int pos = buf.position();
+		if (pos < 5) return false;
+		return buf.get(pos-4) == 13 && buf.get(pos-3)==10 
+				&& buf.get(pos-2) == 13
+				&& buf.get(pos-1) == 10; 
+	}
+	
 	protected String handleConnection(AsynchronousSocketChannel socketChannel) throws IOException  {
 		ByteBuffer buf = ByteBuffer.allocate(1024*4);
 		String incomingMsg = "";
-		byte lastByte = 0;
-		while(lastByte != 0x0a) { // stop reading after we see a newline
+//		byte lastByte = 0;
+		while(!endsBlankLine(buf)) { // stop reading after we see a newline
 			try {
 				logger.finest("waiting for bytes");
 				socketChannel.read(buf).get(connectionTimeoutSeconds, TimeUnit.SECONDS);
-				lastByte = buf.get(buf.position()-1);
+//				lastByte = buf.get(buf.position()-1);
 			} catch (TimeoutException|InterruptedException e) {
 				logger.fine("Connection timed out/interrupted");
 				break;
