@@ -1,0 +1,9 @@
+target
+.*.swp
+.out
+.class
+.err
+.settings
+.project
+.classpath
+.metadata
